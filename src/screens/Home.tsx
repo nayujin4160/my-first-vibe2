@@ -1,11 +1,15 @@
 import { CaretLeft, CaretRight } from '@phosphor-icons/react'
-import { useEffect, useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { blankEntry, EditEntrySheet } from '../components/EditEntrySheet'
+import { PhotoPicker } from '../components/PhotoPicker'
 import { Snackbar } from '../components/Snackbar'
-import { Screen } from '../components/ui'
+import { BottomBar, PrimaryButton, Screen, TextButton } from '../components/ui'
+import type { Entry } from '../data/mock'
 import { flash } from '../lib/flash'
 import { todayIso, won } from '../lib/format'
+import { pending } from '../lib/pending'
 import { navigate } from '../lib/router'
-import { useStore } from '../lib/store'
+import { setState, useStore } from '../lib/store'
 
 const WEEK = ['일', '월', '화', '수', '목', '금', '토']
 
@@ -16,15 +20,34 @@ export function Home() {
   const user = useStore((s) => s.user)
   const entries = useStore((s) => s.entries)
   const photos = useStore((s) => s.photos)
-  const [message] = useState(() => flash.take())
+  const hasDraft = useStore((s) => s.draft !== null)
+  const [notice] = useState(() => flash.take())
+  const picker = useRef<HTMLInputElement>(null)
+  const [writing, setWriting] = useState<Entry | null>(null)
+
+  // 방금 채워진 칸은 잠깐 강조 (FLOWS F2 ④)
+  const [highlight, setHighlight] = useState(() => new Set(notice?.dates ?? []))
+  useEffect(() => {
+    if (highlight.size === 0) return
+    const t = setTimeout(() => setHighlight(new Set()), 2800)
+    return () => clearTimeout(t)
+  }, [highlight])
 
   const today = todayIso()
   const [todayY, todayM] = today.split('-').map(Number)
-  const [view, setView] = useState({ y: todayY, m: todayM }) // m: 1~12
+  // 저장하고 돌아왔으면 저장한 결제 중 가장 최근 날의 달, 아니면 이번 달
+  const [view, setView] = useState(() => {
+    const latest = notice?.dates?.reduce((max, d) => (d > max ? d : max))
+    if (!latest) return { y: todayY, m: todayM } // m: 1~12
+    const [y, m] = latest.split('-').map(Number)
+    return { y, m }
+  })
 
   useEffect(() => {
     if (!user) navigate('/', { replace: true })
-  }, [user])
+    // 정리하다 만 결과가 남아 있으면 정리 결과부터 (FLOWS F2 예외)
+    else if (hasDraft) navigate('/result', { replace: true })
+  }, [user, hasDraft])
 
   if (!user) return null
 
@@ -90,9 +113,9 @@ export function Home() {
               disabled={future}
               onClick={() => navigate(`/day/${date}`)}
               aria-label={`${view.m}월 ${day}일 하루 카드`}
-              className={`m-0.5 flex aspect-square flex-col items-center justify-start overflow-hidden rounded-sm pt-1.5 text-body-small active:opacity-80 disabled:text-disabled-fg ${
+              className={`m-0.5 flex aspect-square flex-col items-center justify-start overflow-hidden rounded-sm pt-1.5 text-body-small transition-colors duration-250 active:opacity-80 disabled:text-disabled-fg ${
                 isToday ? 'ring-1 ring-fg ring-inset' : ''
-              }`}
+              } ${highlight.has(date) ? 'bg-brand-tint' : ''}`}
               style={photo ? { backgroundImage: `url(${photo})`, backgroundSize: 'cover', backgroundPosition: 'center' } : undefined}
             >
               <span
@@ -106,7 +129,33 @@ export function Home() {
         })}
       </div>
 
-      <Snackbar message={message} />
+      <BottomBar>
+        <PrimaryButton onClick={() => picker.current?.click()}>캡처 올리기</PrimaryButton>
+        <TextButton className="mt-1" onClick={() => setWriting(blankEntry(today))}>
+          직접 쓰기
+        </TextButton>
+      </BottomBar>
+
+      <PhotoPicker
+        ref={picker}
+        onPick={(files) => {
+          pending.set(files)
+          navigate('/reading')
+        }}
+      />
+      <EditEntrySheet
+        entry={writing}
+        isNew
+        onClose={() => setWriting(null)}
+        onSave={(e) => {
+          // 직접 쓴 것도 정리 결과(③)를 거쳐 저장 (FLOWS F2 ①)
+          setWriting(null)
+          setState({ draft: { photoCount: 0, failedCount: 0, dupRemoved: 0, entries: [e] } })
+          navigate('/result')
+        }}
+      />
+
+      <Snackbar message={notice?.message ?? null} aboveBar />
     </Screen>
   )
 }

@@ -7,6 +7,7 @@ export type Draft = {
   photoCount: number
   failedCount: number // 읽지 못한 장 수
   dupRemoved: number
+  alreadyRemoved?: number // 이미 저장한 결제라 뺀 건수 (F2)
   entries: Entry[]
 }
 

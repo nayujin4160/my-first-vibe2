@@ -4,7 +4,7 @@ import { Screen } from '../components/ui'
 import { fakeRead } from '../lib/ocr'
 import { pending } from '../lib/pending'
 import { navigate } from '../lib/router'
-import { setState } from '../lib/store'
+import { getState, setState } from '../lib/store'
 
 // F1 ② 정리 중
 export function Reading() {
@@ -28,7 +28,7 @@ export function Reading() {
     if (total === 0) return
     if (done >= total) {
       const t = setTimeout(() => {
-        setState({ draft: fakeRead(total) })
+        setState({ draft: fakeRead(total, getState().entries) })
         pending.clear()
         navigate('/result', { replace: true })
       }, 400)

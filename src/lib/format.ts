@@ -20,6 +20,21 @@ export function dateRange(dates: string[]) {
   return `${m1}월 ${d1}일부터 ${end}까지`
 }
 
+// 채워진 날 안내: "10월 16일이 채워졌어요." · "10월 15일·16일이 채워졌어요." · 넷 이상은 "10월 11일부터 14일까지 채워졌어요."
+export function filledDays(dates: string[]) {
+  const sorted = [...new Set(dates)].sort()
+  if (sorted.length > 3) return `${dateRange(sorted)} 채워졌어요.`
+  let lastMonth = 0
+  return sorted
+    .map((d) => {
+      const [, m, day] = d.split('-').map(Number)
+      const label = m === lastMonth ? `${day}일` : `${m}월 ${day}일`
+      lastMonth = m
+      return label
+    })
+    .join('·') + '이 채워졌어요.'
+}
+
 // '2026-10-14' → '10월 14일 (수)'
 export function dayLabel(date: string) {
   const [y, m, d] = date.split('-').map(Number)

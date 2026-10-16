@@ -29,3 +29,13 @@ export const mockReadEntries: Omit<Entry, 'id' | 'space'>[] = [
   { date: '2026-10-11', shop: '무신사 환불', amount: -39000 },
   { date: '2026-10-11', shop: '망원시장 정육점', amount: 18000 },
 ]
+
+// 두 번째부터 올린 캡처 — 10월 15~16일 새 결제 4건 + 이미 올린 결제 2건 (SETUP.md "데이터")
+export const mockSecondReadEntries: Omit<Entry, 'id' | 'space'>[] = [
+  { date: '2026-10-16', shop: '노브랜드 버거', amount: 13800 },
+  { date: '2026-10-16', shop: '쿠팡이츠', amount: 21500 },
+  { date: '2026-10-15', shop: '런드리고 세탁', amount: 14000 },
+  { date: '2026-10-15', shop: '성수 꽃집', amount: 25000 },
+  { date: '2026-10-14', shop: '성수동 파스타', amount: 38000 },
+  { date: '2026-10-14', shop: 'GS25', amount: 4200 },
+]

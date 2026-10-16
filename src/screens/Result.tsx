@@ -5,7 +5,8 @@ import { PhotoPicker } from '../components/PhotoPicker'
 import { SpaceTag } from '../components/SpaceTag'
 import { BottomBar, PrimaryButton, Screen, TextButton } from '../components/ui'
 import type { Entry } from '../data/mock'
-import { dateRange, dayLabel, todayIso, won } from '../lib/format'
+import { dateRange, dayLabel, filledDays, todayIso, won } from '../lib/format'
+import { flash } from '../lib/flash'
 import { pending } from '../lib/pending'
 import { navigate } from '../lib/router'
 import { setState, useStore } from '../lib/store'
@@ -13,6 +14,7 @@ import { setState, useStore } from '../lib/store'
 // F1 ③ 정리 결과
 export function Result() {
   const draft = useStore((s) => s.draft)
+  const hasUser = useStore((s) => s.user !== null)
   const picker = useRef<HTMLInputElement>(null)
   const [editing, setEditing] = useState<{ entry: Entry; isNew: boolean } | null>(null)
   const [justMoved, setJustMoved] = useState<string | null>(null)
@@ -40,6 +42,14 @@ export function Result() {
     setJustMoved(next.id)
   }
 
+  // F2: 이미 시작한 사람은 계정을 묻지 않고 바로 저장 → 홈 달력에서 채워진 칸 강조 (FLOWS F2 ③④)
+  const saveAndGoHome = () => {
+    const dates = draft.entries.map((e) => e.date)
+    setState((s) => ({ entries: [...s.entries, ...(s.draft?.entries ?? [])], draft: null }))
+    if (dates.length > 0) flash.set(filledDays(dates), dates)
+    navigate('/home', { replace: true })
+  }
+
   const writeNew = () => {
     const latest = draft.entries.reduce((max, e) => (e.date > max ? e.date : max), '')
     setEditing({ entry: blankEntry(latest || todayIso()), isNew: true })
@@ -62,6 +72,32 @@ export function Result() {
       />
     </>
   )
+
+  // 읽은 결제가 모두 이미 저장된 것 (FLOWS F2 ③)
+  if (draft.entries.length === 0 && (draft.alreadyRemoved ?? 0) > 0) {
+    return (
+      <Screen>
+        <div className="flex flex-1 flex-col justify-center px-6">
+          <h1 className="text-title text-fg">이미 올린 결제예요.</h1>
+          <p className="mt-3 text-body text-muted">새로 넣을 내역은 없어요.</p>
+        </div>
+        <BottomBar>
+          <PrimaryButton
+            onClick={() => {
+              setState({ draft: null })
+              navigate('/home', { replace: true })
+            }}
+          >
+            홈으로
+          </PrimaryButton>
+          <TextButton className="mt-1" onClick={writeNew}>
+            캡처 없이 직접 쓸게요
+          </TextButton>
+        </BottomBar>
+        {sheets}
+      </Screen>
+    )
+  }
 
   // 빈 상태: 한 건도 못 읽음
   if (draft.entries.length === 0) {
@@ -106,6 +142,12 @@ export function Result() {
               {draft.dupRemoved > 0
                 ? `전부 공용에 넣었고, 같은 결제 ${draft.dupRemoved}건은 뺐어요.`
                 : '전부 공용에 넣었어요.'}
+              {(draft.alreadyRemoved ?? 0) > 0 && (
+                <>
+                  <br />
+                  이미 올린 결제 {draft.alreadyRemoved}건은 뺐어요.
+                </>
+              )}
               <br />
               용돈으로 옮길 건 눌러서 옮겨주세요.
             </p>
@@ -169,7 +211,7 @@ export function Result() {
       </div>
 
       <BottomBar>
-        <PrimaryButton onClick={() => navigate('/account')}>저장할게요</PrimaryButton>
+        <PrimaryButton onClick={() => (hasUser ? saveAndGoHome() : navigate('/account'))}>저장할게요</PrimaryButton>
       </BottomBar>
 
       {sheets}

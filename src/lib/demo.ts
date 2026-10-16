@@ -5,7 +5,7 @@ function param(name: string) {
 }
 
 export const demo = {
-  ocr: () => param('ocr') as 'none' | 'partial' | null,
+  ocr: () => param('ocr') as 'none' | 'partial' | 'dup' | null,
   kakaoFail: () => param('kakao') === 'fail',
   notifyBlocked: () => param('notify') === 'blocked',
   ios: () => param('ios') === '1',

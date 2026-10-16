@@ -1,13 +1,15 @@
-// 화면을 옮긴 뒤 한 번만 보여줄 짧은 안내
-let message: string | null = null
+// 화면을 옮긴 뒤 한 번만 보여줄 짧은 안내 (+ 홈 달력에서 잠깐 강조할 날짜)
+type Flash = { message: string; dates?: string[] }
+
+let current: Flash | null = null
 
 export const flash = {
-  set(next: string) {
-    message = next
+  set(message: string, dates?: string[]) {
+    current = { message, dates }
   },
   take() {
-    const m = message
-    message = null
-    return m
+    const f = current
+    current = null
+    return f
   },
 }
