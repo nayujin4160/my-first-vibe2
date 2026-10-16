@@ -1,12 +1,19 @@
-import { useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import { PhotoPicker } from '../components/PhotoPicker'
 import { BottomBar, PrimaryButton, Screen } from '../components/ui'
 import { pending } from '../lib/pending'
 import { navigate } from '../lib/router'
+import { useStore } from '../lib/store'
 
 // F1 ① 시작
 export function Start() {
   const picker = useRef<HTMLInputElement>(null)
+  const hasDraft = useStore((s) => s.draft !== null)
+
+  // 계정 만들다 나갔다 돌아오면 정리 결과(③)부터 (FLOWS F1 ④ 예외)
+  useEffect(() => {
+    if (hasDraft) navigate('/result', { replace: true })
+  }, [hasDraft])
 
   return (
     <Screen>
