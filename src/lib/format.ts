@@ -4,6 +4,22 @@ export function won(n: number) {
   return `${n.toLocaleString('ko-KR')}원`
 }
 
+// 오늘 날짜 'YYYY-MM-DD'
+export function todayIso() {
+  const d = new Date()
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+
+// 읽은 결제 날짜 범위: '10월 11일부터 14일까지' · 하루뿐이면 '10월 14일'
+export function dateRange(dates: string[]) {
+  const sorted = [...dates].sort()
+  const [y1, m1, d1] = sorted[0].split('-').map(Number)
+  const [y2, m2, d2] = sorted[sorted.length - 1].split('-').map(Number)
+  if (sorted[0] === sorted[sorted.length - 1]) return `${m1}월 ${d1}일`
+  const end = y1 === y2 && m1 === m2 ? `${d2}일` : `${m2}월 ${d2}일`
+  return `${m1}월 ${d1}일부터 ${end}까지`
+}
+
 // '2026-10-14' → '10월 14일 (수)'
 export function dayLabel(date: string) {
   const [y, m, d] = date.split('-').map(Number)

@@ -1,11 +1,11 @@
-import { WarningCircle } from '@phosphor-icons/react'
+import { Plus, WarningCircle } from '@phosphor-icons/react'
 import { useEffect, useRef, useState } from 'react'
-import { EditEntrySheet } from '../components/EditEntrySheet'
+import { blankEntry, EditEntrySheet } from '../components/EditEntrySheet'
 import { PhotoPicker } from '../components/PhotoPicker'
 import { SpaceTag } from '../components/SpaceTag'
-import { BottomBar, PrimaryButton, Screen } from '../components/ui'
+import { BottomBar, PrimaryButton, Screen, TextButton } from '../components/ui'
 import type { Entry } from '../data/mock'
-import { dayLabel, won } from '../lib/format'
+import { dateRange, dayLabel, todayIso, won } from '../lib/format'
 import { pending } from '../lib/pending'
 import { navigate } from '../lib/router'
 import { setState, useStore } from '../lib/store'
@@ -14,7 +14,7 @@ import { setState, useStore } from '../lib/store'
 export function Result() {
   const draft = useStore((s) => s.draft)
   const picker = useRef<HTMLInputElement>(null)
-  const [editing, setEditing] = useState<Entry | null>(null)
+  const [editing, setEditing] = useState<{ entry: Entry; isNew: boolean } | null>(null)
   const [justMoved, setJustMoved] = useState<string | null>(null)
 
   useEffect(() => {
@@ -29,14 +29,38 @@ export function Result() {
 
   if (!draft) return null
 
-  const reupload = (
-    <PhotoPicker
-      ref={picker}
-      onPick={(files) => {
-        pending.set(files)
-        navigate('/reading')
-      }}
-    />
+  const save = (next: Entry) => {
+    setState((s) => {
+      if (!s.draft) return {}
+      const exists = s.draft.entries.some((e) => e.id === next.id)
+      const entries = exists ? s.draft.entries.map((e) => (e.id === next.id ? next : e)) : [...s.draft.entries, next]
+      return { draft: { ...s.draft, entries } }
+    })
+    setEditing(null)
+    setJustMoved(next.id)
+  }
+
+  const writeNew = () => {
+    const latest = draft.entries.reduce((max, e) => (e.date > max ? e.date : max), '')
+    setEditing({ entry: blankEntry(latest || todayIso()), isNew: true })
+  }
+
+  const sheets = (
+    <>
+      <PhotoPicker
+        ref={picker}
+        onPick={(files) => {
+          pending.set(files)
+          navigate('/reading')
+        }}
+      />
+      <EditEntrySheet
+        entry={editing?.entry ?? null}
+        isNew={editing?.isNew}
+        onClose={() => setEditing(null)}
+        onSave={save}
+      />
+    </>
   )
 
   // 빈 상태: 한 건도 못 읽음
@@ -52,41 +76,50 @@ export function Result() {
         </div>
         <BottomBar>
           <PrimaryButton onClick={() => picker.current?.click()}>다시 올리기</PrimaryButton>
+          <TextButton className="mt-1" onClick={writeNew}>
+            캡처 없이 직접 쓸게요
+          </TextButton>
         </BottomBar>
-        {reupload}
+        {sheets}
       </Screen>
     )
   }
+
+  const read = draft.entries.filter((e) => !e.manual)
+  const manualCount = draft.entries.length - read.length
 
   const byDate = new Map<string, Entry[]>()
   for (const e of [...draft.entries].sort((a, b) => b.date.localeCompare(a.date))) {
     byDate.set(e.date, [...(byDate.get(e.date) ?? []), e])
   }
 
-  const save = (next: Entry) => {
-    setState((s) => ({
-      draft: s.draft && { ...s.draft, entries: s.draft.entries.map((e) => (e.id === next.id ? next : e)) },
-    }))
-    setEditing(null)
-    setJustMoved(next.id)
-  }
-
   return (
     <Screen>
       <header className="px-4 pt-8 pb-4">
-        <h1 className="text-title text-fg">
-          캡처 {draft.photoCount}장에서 {draft.entries.length}건 정리했어요.
-        </h1>
-        <p className="mt-2 text-body text-muted">
-          {draft.dupRemoved > 0
-            ? `전부 공용에 넣었고, 같은 결제 ${draft.dupRemoved}건은 뺐어요.`
-            : '전부 공용에 넣었어요.'}
-          <br />
-          용돈으로 옮길 건 눌러서 옮겨주세요.
-        </p>
+        {read.length > 0 ? (
+          <>
+            <h1 className="text-title text-fg">
+              캡처 {draft.photoCount}장에서 {read.length}건 정리했어요.
+            </h1>
+            <p className="mt-2 text-body text-fg">{dateRange(read.map((e) => e.date))}의 결제예요.</p>
+            <p className="mt-1 text-body text-muted">
+              {draft.dupRemoved > 0
+                ? `전부 공용에 넣었고, 같은 결제 ${draft.dupRemoved}건은 뺐어요.`
+                : '전부 공용에 넣었어요.'}
+              <br />
+              용돈으로 옮길 건 눌러서 옮겨주세요.
+            </p>
+            {manualCount > 0 && <p className="mt-1 text-body text-muted">직접 쓴 {manualCount}건도 같이 저장해요.</p>}
+          </>
+        ) : (
+          <>
+            <h1 className="text-title text-fg">직접 쓴 {manualCount}건이에요.</h1>
+            <p className="mt-2 text-body text-muted">고칠 건 눌러서 고쳐주세요. 저장하면 그날 하루 카드에 들어가요.</p>
+          </>
+        )}
       </header>
 
-      {draft.failedCount > 0 && (
+      {draft.failedCount > 0 && read.length > 0 && (
         <div className="mx-4 mb-2 flex items-center justify-between gap-3 rounded-md bg-surface px-4 py-3">
           <p className="flex items-center gap-2 text-body-small text-fg">
             <WarningCircle size={18} className="shrink-0 text-error" />
@@ -101,7 +134,7 @@ export function Result() {
         </div>
       )}
 
-      <div className="pb-4">
+      <div className="pb-2">
         {[...byDate].map(([date, items]) => (
           <section key={date} className="mt-2">
             <h2 className="px-4 py-2 text-body-small font-bold text-muted">{dayLabel(date)}</h2>
@@ -109,7 +142,7 @@ export function Result() {
               {items.map((e) => (
                 <li key={e.id}>
                   <button
-                    onClick={() => setEditing(e)}
+                    onClick={() => setEditing({ entry: e, isNew: false })}
                     className={`flex w-full items-center gap-3 px-4 py-3 text-left transition-colors duration-250 active:bg-surface ${
                       justMoved === e.id ? 'bg-brand-tint' : ''
                     }`}
@@ -125,12 +158,21 @@ export function Result() {
         ))}
       </div>
 
+      <div className="px-4 pb-4">
+        <button
+          onClick={writeNew}
+          className="flex h-12 w-full items-center justify-center gap-1.5 rounded-md border border-dashed border-hairline text-body-small font-medium text-muted active:bg-surface"
+        >
+          <Plus size={16} />
+          직접 추가
+        </button>
+      </div>
+
       <BottomBar>
         <PrimaryButton onClick={() => navigate('/account')}>저장할게요</PrimaryButton>
       </BottomBar>
 
-      <EditEntrySheet entry={editing} onClose={() => setEditing(null)} onSave={save} />
-      {reupload}
+      {sheets}
     </Screen>
   )
 }

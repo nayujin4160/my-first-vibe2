@@ -8,6 +8,7 @@ export type Entry = {
   shop: string
   amount: number // 환불은 마이너스
   space: Space
+  manual?: boolean // 캡처 없이 직접 쓴 내역
 }
 
 export const mockUserName = '김콩알'

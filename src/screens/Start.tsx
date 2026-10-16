@@ -1,15 +1,19 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { blankEntry, EditEntrySheet } from '../components/EditEntrySheet'
 import { PhotoPicker } from '../components/PhotoPicker'
-import { BottomBar, PrimaryButton, Screen } from '../components/ui'
+import { BottomBar, PrimaryButton, Screen, TextButton } from '../components/ui'
+import type { Entry } from '../data/mock'
+import { todayIso } from '../lib/format'
 import { pending } from '../lib/pending'
 import { navigate } from '../lib/router'
-import { useStore } from '../lib/store'
+import { setState, useStore } from '../lib/store'
 
 // F1 ① 시작
 export function Start() {
   const picker = useRef<HTMLInputElement>(null)
   const hasDraft = useStore((s) => s.draft !== null)
   const hasUser = useStore((s) => s.user !== null)
+  const [writing, setWriting] = useState<Entry | null>(null)
 
   // 계정 만들다 나갔다 돌아오면 정리 결과(③)부터 (FLOWS F1 ④ 예외) · 이미 시작했으면 홈으로
   useEffect(() => {
@@ -31,12 +35,24 @@ export function Start() {
       <BottomBar>
         <PrimaryButton onClick={() => picker.current?.click()}>캡처 올려보기</PrimaryButton>
         <p className="mt-3 text-center text-body-small text-muted">올린 캡처는 글자를 읽는 데만 써요.</p>
+        <TextButton className="mt-1" onClick={() => setWriting(blankEntry(todayIso()))}>
+          캡처 없이 직접 쓸게요
+        </TextButton>
       </BottomBar>
       <PhotoPicker
         ref={picker}
         onPick={(files) => {
           pending.set(files)
           navigate('/reading')
+        }}
+      />
+      <EditEntrySheet
+        entry={writing}
+        isNew
+        onClose={() => setWriting(null)}
+        onSave={(e) => {
+          setState({ draft: { photoCount: 0, failedCount: 0, dupRemoved: 0, entries: [e] } })
+          setWriting(null)
         }}
       />
     </Screen>

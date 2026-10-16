@@ -1,8 +1,10 @@
 import { CaretLeft, CaretRight, Plus } from '@phosphor-icons/react'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { blankEntry, EditEntrySheet } from '../components/EditEntrySheet'
 import { NotifySheet } from '../components/NotifySheet'
 import { PhotoPicker } from '../components/PhotoPicker'
 import { BottomBar, Screen, SecondaryButton } from '../components/ui'
+import type { Entry } from '../data/mock'
 import { flash } from '../lib/flash'
 import { dayLabel, won } from '../lib/format'
 import { shrinkImage } from '../lib/image'
@@ -19,6 +21,17 @@ export function DayCard({ date }: { date: string }) {
   const [failed, setFailed] = useState(false)
   const notifyAsked = useStore((s) => s.notifyAsked)
   const [asking, setAsking] = useState(false)
+  const [editing, setEditing] = useState<{ entry: Entry; isNew: boolean } | null>(null)
+
+  // 캡처 없이 직접 쓰기 · 이날 내역 고치기
+  const saveEntry = (next: Entry) => {
+    setState((s) => {
+      const exists = s.entries.some((e) => e.id === next.id)
+      return { entries: exists ? s.entries.map((e) => (e.id === next.id ? next : e)) : [...s.entries, next] }
+    })
+    setEditing(null)
+    if (next.date !== date) navigate(`/day/${next.date}`, { replace: true })
+  }
 
   // 첫 하루 카드를 본 직후에만 알림을 묻는다 (FLOWS F1 ⑥)
   const goCalendar = () => (notifyAsked ? navigate('/home') : setAsking(true))
@@ -99,16 +112,30 @@ export function DayCard({ date }: { date: string }) {
         )}
       </div>
 
-      <ul className="mt-4 px-4">
+      <ul className="mt-4">
         {entries.map((e) => (
-          <li key={e.id} className="flex items-center gap-3 py-2.5">
-            <span className="flex-1 truncate text-body text-fg">{e.shop}</span>
-            {e.space === '용돈' && (
-              <span className="shrink-0 rounded-sm border border-hairline px-2 py-0.5 text-body-small font-medium text-fg">용돈</span>
-            )}
-            <span className="text-body font-bold text-fg tabular-nums">{won(e.amount)}</span>
+          <li key={e.id}>
+            <button
+              onClick={() => setEditing({ entry: e, isNew: false })}
+              className="flex w-full items-center gap-3 px-4 py-2.5 text-left active:bg-surface"
+            >
+              <span className="flex-1 truncate text-body text-fg">{e.shop}</span>
+              {e.space === '용돈' && (
+                <span className="shrink-0 rounded-sm border border-hairline px-2 py-0.5 text-body-small font-medium text-fg">용돈</span>
+              )}
+              <span className="text-body font-bold text-fg tabular-nums">{won(e.amount)}</span>
+            </button>
           </li>
         ))}
+        <li>
+          <button
+            onClick={() => setEditing({ entry: blankEntry(date), isNew: true })}
+            className="flex w-full items-center gap-1.5 px-4 py-2.5 text-body-small font-medium text-muted active:bg-surface"
+          >
+            <Plus size={16} />
+            직접 추가
+          </button>
+        </li>
       </ul>
 
       <div className="mx-4 mt-2 flex items-center justify-between border-t border-hairline pt-3 pb-4">
@@ -119,6 +146,13 @@ export function DayCard({ date }: { date: string }) {
       <BottomBar>
         <SecondaryButton onClick={goCalendar}>달력 보기</SecondaryButton>
       </BottomBar>
+
+      <EditEntrySheet
+        entry={editing?.entry ?? null}
+        isNew={editing?.isNew}
+        onClose={() => setEditing(null)}
+        onSave={saveEntry}
+      />
 
       <NotifySheet open={asking} onAccept={() => closeNotify(true)} onDecline={() => closeNotify(false)} />
 
