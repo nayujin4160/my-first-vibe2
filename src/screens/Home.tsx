@@ -20,7 +20,8 @@ export function Home() {
   const user = useStore((s) => s.user)
   const entries = useStore((s) => s.entries)
   const photos = useStore((s) => s.photos)
-  const hasDraft = useStore((s) => s.draft !== null)
+  // 읽은 내역이 0건인 결과는 이어서 볼 게 없으니 홈을 그대로 보여준다
+  const hasDraft = useStore((s) => (s.draft?.entries.length ?? 0) > 0)
   const [notice] = useState(() => flash.take())
   const picker = useRef<HTMLInputElement>(null)
   const [writing, setWriting] = useState<Entry | null>(null)

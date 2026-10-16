@@ -115,6 +115,17 @@ export function Result() {
           <TextButton className="mt-1" onClick={writeNew}>
             캡처 없이 직접 쓸게요
           </TextButton>
+          {/* 이미 시작한 사람은 달력으로 돌아갈 수 있게 (02 점검 막힘 1) */}
+          {hasUser && (
+            <TextButton
+              onClick={() => {
+                setState({ draft: null })
+                navigate('/home', { replace: true })
+              }}
+            >
+              홈으로
+            </TextButton>
+          )}
         </BottomBar>
         {sheets}
       </Screen>
