@@ -1,0 +1,547 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>콩알가계부 — Design</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+  :root {
+    --bg: #ffffff;
+    --surface: #f7f7f8;
+    --line: #e7e7ea;
+    --ink: #17171a;
+    --ink-2: #4b4b55;
+    --ink-3: #8a8a96;
+    --accent: #2f6bff;
+    --accent-soft: #eef3ff;
+    --good: #12805c;
+    --good-soft: #e9f6f0;
+    --bad: #c8372d;
+    --bad-soft: #fcefee;
+    --radius: 12px;
+    --sidebar: 248px;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; scroll-padding-top: 32px; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+    font-size: 15px; line-height: 1.65; -webkit-font-smoothing: antialiased;
+    word-break: keep-all;
+  }
+  a { color: inherit; }
+
+  /* ---------- layout ---------- */
+  .layout { display: grid; grid-template-columns: var(--sidebar) minmax(0, 1fr); min-height: 100vh; }
+  main { min-width: 0; }
+  .sidebar {
+    position: sticky; top: 0; height: 100vh; overflow-y: auto;
+    border-right: 1px solid var(--line); padding: 28px 20px;
+  }
+  main { max-width: 820px; width: 100%; padding: 56px 56px 96px; }
+  main.is-wide { max-width: 1480px; }
+  main.is-wide .cover, main.is-wide .section > p, main.is-wide .callout { max-width: 820px; }
+
+  /* ---------- sidebar ---------- */
+  .brand { font-weight: 700; font-size: 16px; letter-spacing: -0.01em; }
+  .brand small { display: block; font-weight: 500; font-size: 12px; color: var(--ink-3); letter-spacing: 0; }
+  .nav { list-style: none; margin: 28px 0 0; padding: 0; }
+  .nav-group { font-size: 11px; font-weight: 600; color: var(--ink-3); letter-spacing: 0.06em; text-transform: uppercase; margin: 0 0 8px; }
+  .nav a {
+    display: flex; align-items: center; gap: 8px; text-decoration: none;
+    padding: 6px 10px; border-radius: 8px; color: var(--ink-2); font-size: 14px;
+  }
+  .nav a:hover { background: var(--surface); }
+  .nav .step { font-size: 11px; color: var(--ink-3); width: 14px; font-variant-numeric: tabular-nums; }
+  .nav .is-current > a { background: var(--surface); color: var(--ink); font-weight: 600; }
+  .nav .is-pending > a { color: var(--ink-3); pointer-events: none; }
+  .nav .is-pending > a::after { content: "준비 중"; margin-left: auto; font-size: 11px; }
+  .toc { list-style: none; margin: 4px 0 8px 22px; padding: 0 0 0 10px; border-left: 1px solid var(--line); }
+  .toc a { padding: 4px 10px; font-size: 13px; color: var(--ink-3); }
+  .toc a.is-active { color: var(--accent); font-weight: 600; background: none; }
+
+  /* ---------- cover ---------- */
+  .cover { padding-bottom: 40px; border-bottom: 1px solid var(--line); margin-bottom: 8px; }
+  .eyebrow { font-size: 12px; font-weight: 600; color: var(--accent); letter-spacing: 0.08em; text-transform: uppercase; }
+  .cover h1 { font-size: 40px; line-height: 1.2; letter-spacing: -0.03em; margin: 10px 0 14px; }
+  .lead { font-size: 20px; line-height: 1.55; color: var(--ink-2); margin: 0; letter-spacing: -0.01em; }
+  .meta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 20px; }
+  .tag { font-size: 12px; color: var(--ink-2); background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 3px 10px; }
+
+  /* ---------- section ---------- */
+  .section { padding-top: 48px; }
+  .section-label { font-size: 12px; font-weight: 600; color: var(--ink-3); letter-spacing: 0.06em; text-transform: uppercase; }
+  .section h2 { font-size: 22px; letter-spacing: -0.02em; margin: 4px 0 16px; }
+  .section p { margin: 0 0 12px; color: var(--ink-2); }
+
+  /* ---------- flow ---------- */
+  .flow { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 28px; }
+  .flow-step { position: relative; background: var(--surface); border-radius: var(--radius); padding: 18px; }
+  .flow-step:not(:last-child)::after {
+    content: "→"; position: absolute; right: -21px; top: 50%; transform: translateY(-50%);
+    color: var(--ink-3); font-size: 16px;
+  }
+  .flow-step h3 { font-size: 13px; color: var(--ink-3); font-weight: 600; margin: 0 0 6px; }
+  .flow-step p { margin: 0; color: var(--ink); font-size: 14px; }
+
+  /* ---------- cards ---------- */
+  .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .grid > .card:last-child:nth-child(odd) { grid-column: 1 / -1; }
+  .card { border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; }
+  .card h3 { font-size: 15px; margin: 0 0 4px; letter-spacing: -0.01em; }
+  .card p { margin: 0; font-size: 14px; color: var(--ink-2); }
+  .card .num { font-size: 12px; color: var(--accent); font-weight: 600; font-variant-numeric: tabular-nums; }
+  .card.is-muted { border-style: dashed; background: none; }
+  .card.is-muted h3, .card.is-muted p { color: var(--ink-3); }
+  .sub { font-size: 13px; font-weight: 600; color: var(--ink-3); margin: 24px 0 10px; }
+
+  /* ---------- callout ---------- */
+  .callout { background: var(--accent-soft); border-radius: var(--radius); padding: 22px 24px; }
+  .callout .big { font-size: 18px; font-weight: 600; letter-spacing: -0.01em; margin: 0 0 12px; color: var(--ink); }
+  .callout.is-empty { background: none; border: 1px dashed var(--line); color: var(--ink-3); text-align: center; padding: 28px; }
+  .callout.is-empty p { color: var(--ink-3); margin: 0; }
+  .source { font-size: 12px; color: var(--ink-3); margin-top: 12px; }
+
+  /* ---------- key-value ---------- */
+  .kv { display: grid; grid-template-columns: 120px 1fr; gap: 10px 16px; margin: 0; }
+  .kv dt { color: var(--ink-3); font-size: 13px; padding-top: 1px; }
+  .kv dd { margin: 0; color: var(--ink); }
+
+  .card .kv { grid-template-columns: 1fr; gap: 2px; margin-top: 10px; }
+  .card .kv dd { margin-bottom: 8px; font-size: 14px; color: var(--ink-2); }
+
+  /* ---------- table ---------- */
+  .table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius); }
+  .table-wrap table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .table-wrap th, .table-wrap td { text-align: left; vertical-align: top; padding: 10px 14px; border-bottom: 1px solid var(--line); }
+  .table-wrap thead th { background: var(--surface); color: var(--ink-2); font-size: 13px; font-weight: 600; white-space: nowrap; }
+  .table-wrap tbody th { font-weight: 600; color: var(--ink); white-space: nowrap; }
+  .table-wrap td { color: var(--ink-2); }
+  .table-wrap tr:last-child > * { border-bottom: 0; }
+  .table-wrap a { color: var(--accent); text-decoration: none; }
+  .table-wrap code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; background: var(--surface); padding: 1px 5px; border-radius: 4px; }
+  .table-wrap + .sub { margin-top: 28px; }
+  .table-wrap + p { margin-top: 12px; }
+
+  /* ---------- shots ---------- */
+  .shots { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+  .shots.is-mobile { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .shot { margin: 0; border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; background: var(--bg); }
+  .shot img { display: block; width: 100%; height: auto; background: var(--surface); border-bottom: 1px solid var(--line); }
+  .shot figcaption { padding: 14px 16px; }
+  .shot figcaption strong { display: block; font-size: 14px; }
+  .shot figcaption p { margin: 4px 0 0; font-size: 13px; color: var(--ink-2); }
+  .shot .source { margin-top: 8px; }
+  .source a { color: inherit; }
+
+  /* ---------- refs ---------- */
+  .refs { margin: 0; padding-left: 18px; font-size: 14px; color: var(--ink-2); }
+  .refs li { margin-bottom: 6px; }
+  .refs a { color: var(--accent); text-decoration: none; word-break: break-all; }
+
+  /* ---------- spectrum ---------- */
+  .spectrum { display: grid; gap: 14px; }
+  .spectrum-row { display: grid; grid-template-columns: 110px minmax(0, 1fr) 110px; align-items: center; gap: 16px; font-size: 13px; }
+  .spectrum-label { color: var(--ink-3); }
+  .spectrum-row .spectrum-label:last-child { text-align: right; }
+  .spectrum-track { position: relative; display: flex; justify-content: space-between; align-items: center; height: 16px; }
+  .spectrum-track::before { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 2px; background: var(--line); transform: translateY(-50%); }
+  .spectrum-track i { position: relative; width: 10px; height: 10px; border-radius: 50%; background: var(--bg); border: 2px solid var(--line); }
+  .spectrum-track i.is-on { width: 16px; height: 16px; background: var(--accent); border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-soft); }
+
+  /* ---------- compare ---------- */
+  .compare { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .compare-col { border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; }
+  .compare-col h3 { font-size: 14px; margin: 0 0 10px; }
+  .compare-col.is-do h3 { color: var(--good); }
+  .compare-col.is-dont h3 { color: var(--bad); }
+  .compare-col.is-do h3::before { content: "✓ "; }
+  .compare-col.is-dont h3::before { content: "✕ "; }
+  .compare-col ul { list-style: none; margin: 0; padding: 0; }
+  .compare-col li { padding: 8px 0; border-top: 1px solid var(--line); font-size: 14px; color: var(--ink); }
+  .compare-col li:first-child { border-top: 0; padding-top: 0; }
+  .compare-col li .note { display: block; font-size: 13px; color: var(--ink-3); margin-top: 2px; }
+
+  /* ---------- say ---------- */
+  .say { margin: 8px 0 0; padding: 8px 12px; border-radius: 8px; background: var(--surface); font-size: 14px; color: var(--ink); border-left: 3px solid var(--line); }
+  .say.is-do { background: var(--good-soft); border-left-color: var(--good); }
+  .say.is-dont { background: var(--bad-soft); border-left-color: var(--bad); color: var(--ink-2); }
+
+  /* ---------- design specimen ---------- */
+  .swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
+  .swatch { border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; font-size: 13px; }
+  .swatch .chip-color { display: block; height: 72px; border-bottom: 1px solid var(--line); }
+  .swatch strong, .swatch code, .swatch .note { display: block; padding: 0 12px; }
+  .swatch strong { padding-top: 10px; font-size: 14px; }
+  .swatch code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; color: var(--ink-2); margin-top: 2px; }
+  .swatch .note { color: var(--ink-3); padding-bottom: 12px; margin-top: 4px; }
+  .swatches.is-small { grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 8px; }
+  .swatches.is-small .chip-color { height: 40px; }
+  .swatches.is-small .note { display: none; }
+  .swatches + .kv { margin-top: 16px; }
+  .type-scale { border: 1px solid var(--line); border-radius: var(--radius); }
+  .type-row { display: grid; grid-template-columns: 160px minmax(0, 1fr); gap: 16px; align-items: baseline; padding: 16px 18px; border-top: 1px solid var(--line); }
+  .type-row:first-child { border-top: 0; }
+  .type-meta { font-size: 12px; color: var(--ink-3); }
+  .type-meta strong { display: block; font-size: 13px; color: var(--ink); }
+  .type-sample { color: var(--ink); overflow-wrap: anywhere; }
+  .token-rows { display: grid; gap: 10px; }
+  .token-row { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 16px; align-items: center; font-size: 13px; }
+  .token-box { width: 48px; height: 48px; background: var(--accent-soft); border: 1px solid var(--line); }
+  .token-box.is-space { height: 16px; min-width: 2px; border: 0; border-radius: 2px; background: var(--accent); }
+  .token-meta { color: var(--ink-2); }
+  .token-meta code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; color: var(--ink-3); margin-left: 6px; }
+  .dot { display: inline-block; width: 12px; height: 12px; border-radius: 50%; border: 1px solid var(--line); vertical-align: -1px; margin-right: 6px; }
+  .ds-preview {
+    border: 1px solid var(--line); border-radius: var(--radius); padding: 28px;
+    background: var(--ds-bg, #fff); color: var(--ds-text, var(--ink));
+    font-family: var(--ds-font, inherit); display: grid; gap: 20px;
+  }
+  .ds-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  .ds-btn {
+    font: inherit; font-size: var(--ds-btn-size, 15px); font-weight: 600; cursor: default;
+    padding: var(--ds-btn-pad, 12px 20px); border-radius: var(--ds-btn-radius, var(--ds-radius, 10px)); white-space: nowrap;
+    background: var(--ds-primary, var(--accent)); color: var(--ds-on-primary, #fff); border: 1px solid transparent;
+  }
+  .ds-btn.is-secondary { background: var(--ds-surface, var(--surface)); color: var(--ds-text, var(--ink)); border-color: var(--ds-secondary-border, var(--ds-border, var(--line))); }
+  .ds-card {
+    background: var(--ds-surface, #fff); border: 1px solid var(--ds-border, var(--line));
+    border-radius: var(--ds-radius, 12px); box-shadow: var(--ds-shadow, none); padding: 18px; max-width: 360px;
+  }
+  .ds-card h4 { margin: 0 0 4px; font-size: var(--ds-title-size, 17px); }
+  .ds-card p { margin: 0; font-size: 14px; color: var(--ds-muted, var(--ink-2)); }
+  .ds-input {
+    font: inherit; font-size: 15px; width: 100%; max-width: 360px; padding: 12px 14px;
+    border-radius: var(--ds-input-radius, var(--ds-radius, 10px)); border: 1px solid var(--ds-border, var(--line));
+    background: var(--ds-bg, #fff); color: var(--ds-text, var(--ink));
+  }
+  .ds-chip { font-size: 13px; padding: 6px 12px; border-radius: 999px; background: var(--ds-surface, #fff); border: 1px solid var(--ds-border, var(--line)); color: var(--ds-text, var(--ink)); }
+  .ds-chip.is-on { border-color: transparent; background: var(--ds-primary-soft, color-mix(in srgb, var(--ds-primary, var(--accent)) 12%, #fff)); color: var(--ds-primary, var(--accent)); }
+  .preview-label { font-size: 12px; color: var(--ink-3); margin: 0 0 8px; font-family: "Pretendard Variable", Pretendard, sans-serif; }
+
+  /* ---------- flow board ---------- */
+  .board { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+  .board-col { background: var(--surface); border-radius: var(--radius); padding: 12px; min-height: 96px; }
+  .board-col h3 { display: flex; justify-content: space-between; font-size: 13px; color: var(--ink-2); margin: 0 0 10px; }
+  .board-col h3 .count { color: var(--ink-3); font-weight: 500; }
+  .board-col.is-done h3 { color: var(--good); }
+  .board-item { display: block; background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; margin-bottom: 8px; text-decoration: none; color: inherit; }
+  a.board-item:hover { border-color: var(--accent); }
+  .board-item .flow-id { font-size: 11px; font-weight: 700; color: var(--accent); }
+  .board-item strong { display: block; font-size: 14px; margin-top: 2px; }
+  .board-item p { margin: 4px 0 0; font-size: 12px; color: var(--ink-3); }
+
+  /* ---------- phones ---------- */
+  .phones { display: flex; flex-wrap: wrap; gap: 28px 34px; padding: 4px; font-family: var(--ds-font, inherit); }
+  /* 카드 크기는 모든 카드가 같다. 스크롤 화면만 .is-tall(1.5배)·.is-taller(2배)로 높이를 늘린다 */
+  .phone {
+    --phone-w: 196px; --phone-base-h: 420px; --phone-h: calc(var(--phone-base-h) * var(--phone-scale, 1));
+    position: relative; flex: 0 0 var(--phone-w); min-width: 0; /* min-width: 0 — 안의 내용이 넓어도 카드 폭이 늘어나지 않게 */
+  }
+  .phone.is-tall { --phone-scale: 1.5; }
+  .phone.is-taller { --phone-scale: 2; }
+  .phones.is-desktop .phone { --phone-w: 360px; --phone-base-h: 240px; }
+  .is-wide .phones { gap: 40px 48px; }
+  .is-wide .phone { --phone-w: 300px; --phone-base-h: 620px; }
+  .is-wide .phones.is-desktop .phone { --phone-w: 640px; --phone-base-h: 400px; }
+  .phone:not(:last-child)::after { content: "→"; position: absolute; right: -25px; top: 200px; color: var(--ink-3); font-size: 16px; font-family: "Pretendard Variable", Pretendard, sans-serif; }
+  .phone-step { font-size: 12px; color: var(--ink-3); margin-bottom: 6px; font-family: "Pretendard Variable", Pretendard, sans-serif; }
+  .phone-step strong { color: var(--ink); margin-left: 4px; }
+  .phone-screen {
+    position: relative; display: flex; flex-direction: column; gap: 10px; height: var(--phone-h); overflow: hidden;
+    border: 1px solid var(--line); border-radius: 24px; padding: 18px 14px 0;
+    background: var(--ds-bg, #fff); color: var(--ds-text, var(--ink)); box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+  }
+  .phones.is-desktop .phone-screen { border-radius: 12px; }
+  .is-wide .phone-screen { border-radius: 32px; padding: 24px 20px 0; gap: 14px; }
+  .is-wide .phones.is-desktop .phone-screen { border-radius: 14px; }
+  .is-wide .phone:not(:last-child)::after { right: -34px; top: 300px; }
+  .phone-screen .ds-btn { font-size: 13px; padding: 9px 14px; align-self: flex-start; }
+  .phone-screen .ds-card { padding: 12px; max-width: none; }
+  .phone-screen .ds-card h4 { font-size: 14px; }
+  .phone-screen .ds-card p { font-size: 12px; }
+  .phone-screen .ds-input { font-size: 13px; padding: 9px 11px; max-width: none; }
+  .phone-screen p { margin: 0; }
+  .phone-screen p.ph-title { font-size: 17px; font-weight: 700; line-height: 1.35; color: var(--ds-text, var(--ink)); }
+  .phone-screen p.ph-label { font-size: 12px; font-weight: 600; color: var(--ds-text, var(--ink)); margin-top: 4px; }
+  .phone-screen p.ph-text { font-size: 12px; line-height: 1.5; color: var(--ds-muted, var(--ink-2)); }
+  .ph-img { display: flex; align-items: center; justify-content: center; height: 88px; border-radius: var(--ds-radius, 10px); background: var(--ds-surface-alt, #eeeef0); font-size: 11px; color: var(--ds-muted, var(--ink-3)); }
+  .ph-img.is-map { height: 140px; background-image: linear-gradient(var(--ds-border, #dcdce0) 1px, transparent 1px), linear-gradient(90deg, var(--ds-border, #dcdce0) 1px, transparent 1px); background-size: 22px 22px; }
+  .ph-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .ph-sheet { margin: auto -14px 0; padding: 16px 14px 18px; border-radius: 18px 18px 0 0; background: var(--ds-surface, #fff); border-top: 1px solid var(--ds-border, var(--line)); box-shadow: 0 -6px 20px rgba(0,0,0,0.08); display: flex; flex-direction: column; gap: 8px; }
+  .ph-list { display: grid; gap: 8px; }
+  .ph-item { display: flex; gap: 10px; align-items: center; font-size: 12px; padding: 8px; border: 1px solid var(--ds-border, var(--line)); border-radius: var(--ds-radius, 10px); }
+  .ph-item::before { content: ""; flex: 0 0 32px; height: 40px; border-radius: 6px; background: var(--ds-surface-alt, #eeeef0); }
+  .ph-more {
+    position: absolute; left: 0; right: 0; bottom: 0; padding: 32px 0 12px; text-align: center; font-size: 11px;
+    color: var(--ds-muted, var(--ink-3)); background: linear-gradient(to bottom, transparent, var(--ds-bg, #fff) 55%);
+  }
+  .ph-bar { margin-top: auto; display: flex; justify-content: space-around; border-top: 1px solid var(--ds-border, var(--line)); padding: 10px 0 14px; font-size: 11px; color: var(--ds-muted, var(--ink-3)); }
+  .phone-note { font-size: 12px; color: var(--ink-2); margin-top: 8px; font-family: "Pretendard Variable", Pretendard, sans-serif; }
+
+  /* ---------- chips ---------- */
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { border: 1px solid var(--line); border-radius: 999px; padding: 6px 14px; font-size: 14px; color: var(--ink-2); }
+  .chip.is-selected { border-color: var(--accent); color: var(--accent); font-weight: 600; }
+  .chip.is-selected::before { content: "✓ "; }
+
+  .footer { margin-top: 64px; padding-top: 20px; border-top: 1px solid var(--line); font-size: 12px; color: var(--ink-3); }
+
+  /* ---------- responsive ---------- */
+  @media (max-width: 860px) {
+    .layout { grid-template-columns: minmax(0, 1fr); }
+    .sidebar { position: static; height: auto; border-right: 0; border-bottom: 1px solid var(--line); padding: 16px; }
+    .nav { margin-top: 12px; display: flex; gap: 4px; overflow-x: auto; }
+    .nav-group, .toc { display: none; }
+    .nav a { white-space: nowrap; }
+    .nav .is-pending > a::after { content: none; }
+    main { padding: 32px 16px 64px; }
+    .cover h1 { font-size: 30px; }
+    .lead { font-size: 17px; }
+    .flow { grid-template-columns: 1fr; gap: 20px; }
+    .flow-step:not(:last-child)::after { content: "↓"; right: auto; left: 50%; top: auto; bottom: -20px; transform: translateX(-50%); }
+    .grid { grid-template-columns: 1fr; }
+    .shots { grid-template-columns: 1fr; }
+    .compare { grid-template-columns: 1fr; }
+    .type-row { grid-template-columns: 1fr; gap: 6px; }
+    .ds-preview { padding: 18px; }
+    .board { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .is-wide .phone, .is-wide .phones.is-desktop .phone { flex-basis: 100%; max-width: 340px; }
+    .phone:not(:last-child)::after, .is-wide .phone:not(:last-child)::after { content: "↓"; right: auto; left: 50%; top: auto; bottom: -26px; transform: translateX(-50%); }
+    .spectrum-row { grid-template-columns: 72px minmax(0, 1fr) 72px; gap: 10px; }
+    .shots.is-mobile { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .kv { grid-template-columns: 1fr; gap: 2px; }
+    .kv dd { margin-bottom: 10px; }
+  }
+  @media print {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar { display: none; }
+    main { max-width: none; padding: 0; }
+    .section { break-inside: avoid; }
+    .shot, .card { break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+<div class="layout">
+
+  <aside class="sidebar">
+    <div class="brand">콩알가계부<small>Vibe Studio</small></div>
+    <ul class="nav">
+      <li class="nav-group">기획 문서</li>
+      <li><a href="PRODUCT.html"><span class="step">1</span>Product</a></li>
+      <li><a href="BENCHMARK.html"><span class="step">2</span>Benchmark</a></li>
+      <li><a href="VOICE.html"><span class="step">3</span>Voice</a></li>
+      <li class="is-current">
+        <a href="DESIGN.html"><span class="step">4</span>Design</a>
+        <ul class="toc">
+          <li><a href="#theme">분위기</a></li>
+          <li><a href="#color">색</a></li>
+          <li><a href="#boundaries">쓰는 곳</a></li>
+          <li><a href="#type">글꼴</a></li>
+          <li><a href="#shape">간격·모양</a></li>
+          <li><a href="#preview">미리보기</a></li>
+          <li><a href="#deps">라이브러리</a></li>
+          <li><a href="#dos">Do · Don't</a></li>
+          <li><a href="#voice">보이스</a></li>
+        </ul>
+      </li>
+      <li class="is-pending"><a href="FLOWS.html"><span class="step">5</span>Flows</a></li>
+    </ul>
+  </aside>
+
+  <main>
+    <header class="cover">
+      <div class="eyebrow">Design</div>
+      <h1>콩알가계부</h1>
+      <p class="lead">따뜻한 주황 하나와 차분한 회색, 가벼운 화면 장식으로 둘의 하루(날짜·장소·금액·사진)를 앞에 두는 디자인이에요.</p>
+      <div class="meta">
+        <span class="tag">콩알가계부 (Kongal Gagyebu)</span>
+        <span class="tag">레퍼런스: Karrot (당근) SEED v2</span>
+        <span class="tag">2026-10-16</span>
+      </div>
+    </header>
+
+    <section class="section" id="theme">
+      <div class="section-label">Theme</div>
+      <h2>분위기</h2>
+      <p>캡처나 영수증을 올리면 쓴 돈이 그날 사진과 함께 '둘의 하루'로 정리돼요. 화면은 귀찮은 정리를 조용히 끝내 두고 한 발 물러서는 살림 메이트처럼, 기록 자체가 앞에 서도록 장식을 덜어냈어요.</p>
+      <p>색·글자 크기·간격 같은 시각 값은 당근 SEED v2 디자인 시스템에서 그대로 가져왔어요. 주황은 두 가지를 구분해요. 앱 안의 주요 색은 <code>#ff6f0f</code>, 랜딩 페이지 버튼은 <code>#ff6600</code>이에요.</p>
+    </section>
+
+    <section class="section" id="color">
+      <div class="section-label">Color</div>
+      <h2>색</h2>
+      <div class="sub">브랜드</div>
+      <div class="swatches">
+        <div class="swatch"><i class="chip-color" style="background:#ff6f0f"></i><strong>primary · accent-500</strong><code>#ff6f0f</code><span class="note">Kongal Orange. 주요 버튼, 선택 상태</span></div>
+        <div class="swatch"><i class="chip-color" style="background:#ff9e66"></i><strong>primary-hover / pressed</strong><code>#ff9e66</code><span class="note">주요 버튼을 가리키거나 누를 때</span></div>
+        <div class="swatch"><i class="chip-color" style="background:#fff5f0"></i><strong>brand-tint · accent-50</strong><code>#fff5f0</code><span class="note">방금 정리된 항목을 잠깐 표시</span></div>
+        <div class="swatch"><i class="chip-color" style="background:#ff6600"></i><strong>marketing</strong><code>#ff6600</code><span class="note">랜딩 · 소개 페이지 버튼만</span></div>
+      </div>
+      <div class="sub">배경 · 표면</div>
+      <div class="swatches">
+        <div class="swatch"><i class="chip-color" style="background:#ffffff"></i><strong>canvas</strong><code>#ffffff</code><span class="note">기본 바탕</span></div>
+        <div class="swatch"><i class="chip-color" style="background:#f2f3f6"></i><strong>background</strong><code>#f2f3f6</code><span class="note">화면 배경</span></div>
+        <div class="swatch"><i class="chip-color" style="background:#f7f8fa"></i><strong>surface</strong><code>#f7f8fa</code><span class="note">내용 영역</span></div>
+      </div>
+      <div class="sub">글자 · 선</div>
+      <div class="swatches">
+        <div class="swatch"><i class="chip-color" style="background:#212124"></i><strong>foreground</strong><code>#212124</code><span class="note">기본 글자</span></div>
+        <div class="swatch"><i class="chip-color" style="background:#868b94"></i><strong>muted</strong><code>#868b94</code><span class="note">보조 글자</span></div>
+        <div class="swatch"><i class="chip-color" style="background:#ffffff"></i><strong>on-primary</strong><code>#ffffff</code><span class="note">주황 위 글자</span></div>
+        <div class="swatch"><i class="chip-color" style="background:#eaebee"></i><strong>hairline</strong><code>#eaebee</code><span class="note">구분선</span></div>
+      </div>
+      <div class="sub">상태</div>
+      <div class="swatches">
+        <div class="swatch"><i class="chip-color" style="background:#fa2314"></i><strong>error</strong><code>#fa2314</code><span class="note">진짜 오류만</span></div>
+        <div class="swatch"><i class="chip-color" style="background:#009ceb"></i><strong>info</strong><code>#009ceb</code><span class="note">안내</span></div>
+        <div class="swatch"><i class="chip-color" style="background:#1aa174"></i><strong>success</strong><code>#1aa174</code><span class="note">정산 · 목표 달성 확인</span></div>
+      </div>
+    </section>
+
+    <section class="section" id="boundaries">
+      <div class="section-label">Boundaries</div>
+      <h2>어디에 쓰고, 어디엔 쓰지 않나</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>요소</th><th>쓰는 곳</th><th>쓰지 않는 곳</th></tr></thead>
+          <tbody>
+            <tr><th><i class="dot" style="background:#ff6f0f"></i>accent-500 <code>#ff6f0f</code></th><td>화면당 주요 행동 1개, 선택 상태</td><td>배경 면, 본문 글자, 장식, 그림자 색</td></tr>
+            <tr><th><i class="dot" style="background:#ff6600"></i>marketing <code>#ff6600</code></th><td>랜딩 · 소개 페이지 버튼만</td><td>앱 안의 모든 화면</td></tr>
+            <tr><th><i class="dot" style="background:#fff5f0"></i>brand-tint <code>#fff5f0</code></th><td>방금 정리되거나 옮긴 항목을 잠깐 표시</td><td>넓은 배경, 카드 기본 배경</td></tr>
+            <tr><th><i class="dot" style="background:#fa2314"></i>error <code>#fa2314</code></th><td>진짜 오류(읽지 못한 캡처, 실패한 업로드)</td><td>밀린 기록 안내, 알림, 지출 경고</td></tr>
+            <tr><th><i class="dot" style="background:#1aa174"></i>success <code>#1aa174</code></th><td>정산 · 목표 달성 확인</td><td>일상적인 저장 알림, 장식</td></tr>
+            <tr><th>H1–H3 (48 / 42 / 34px)</th><td>랜딩 · 소개 페이지 제목</td><td>앱 화면 (앱 제목은 Title 24px까지)</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="section" id="type">
+      <div class="section-label">Type</div>
+      <h2>글꼴</h2>
+      <p>모든 단계에 Pretendard를 써요. 레퍼런스는 시스템 글꼴이었지만, 운영체제마다 한글이 다르게 보이지 않도록 바꿨어요. 크기·굵기·줄간격은 레퍼런스 그대로예요.</p>
+      <div class="type-scale" style="font-family:Pretendard, -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', sans-serif">
+        <div class="type-row"><div class="type-meta"><strong>H1</strong>48px · 700 · 135%</div><div class="type-sample" style="font-size:48px;font-weight:700;line-height:135%">캡처 한 장이면 돼요</div></div>
+        <div class="type-row"><div class="type-meta"><strong>H2</strong>42px · 700 · 135%</div><div class="type-sample" style="font-size:42px;font-weight:700;line-height:135%">오늘 거 올려볼까요?</div></div>
+        <div class="type-row"><div class="type-meta"><strong>H3</strong>34px · 700 · 135%</div><div class="type-sample" style="font-size:34px;font-weight:700;line-height:135%">목표 달성.</div></div>
+        <div class="type-row"><div class="type-meta"><strong>Title 1 Bold</strong>24px · 700 · 135%</div><div class="type-sample" style="font-size:24px;font-weight:700;line-height:135%">3월 14일 · 성수동 파스타 38,000원</div></div>
+        <div class="type-row"><div class="type-meta"><strong>Body L1</strong>16px · 400 · 150% · -0.02em</div><div class="type-sample" style="font-size:16px;font-weight:400;line-height:150%;letter-spacing:-0.02em">캡처 4장에서 12건 정리했어요. 전부 공용에 넣었고, 같은 결제 1건은 뺐어요.</div></div>
+        <div class="type-row"><div class="type-meta"><strong>Body L2</strong>14px · 400 · 150% · -0.02em</div><div class="type-sample" style="font-size:14px;font-weight:400;line-height:150%;letter-spacing:-0.02em">이 캡처는 금액을 읽지 못했어요. 글자가 흐리거나 잘렸을 수 있어요.</div></div>
+      </div>
+    </section>
+
+    <section class="section" id="shape">
+      <div class="section-label">Shape</div>
+      <h2>간격 · 모서리</h2>
+      <p>모든 수치는 4px 단위에 맞춰요. 공통으로 쓰는 그림자 토큰은 없어요.</p>
+      <div class="sub">간격</div>
+      <div class="token-rows">
+        <div class="token-row"><div class="token-box is-space" style="width:4px"></div><div class="token-meta">sm<code>4px</code></div></div>
+        <div class="token-row"><div class="token-box is-space" style="width:8px"></div><div class="token-meta">md<code>8px</code></div></div>
+        <div class="token-row"><div class="token-box is-space" style="width:12px"></div><div class="token-meta">lg<code>12px</code></div></div>
+        <div class="token-row"><div class="token-box is-space" style="width:16px"></div><div class="token-meta">xl · 모바일 가장자리 여백<code>16px</code></div></div>
+        <div class="token-row"><div class="token-box is-space" style="width:64px"></div><div class="token-meta">section<code>64px</code></div></div>
+      </div>
+      <div class="sub">모서리</div>
+      <div class="token-rows">
+        <div class="token-row"><div class="token-box" style="border-radius:6px"></div><div class="token-meta">sm<code>6px</code></div></div>
+        <div class="token-row"><div class="token-box" style="border-radius:8px"></div><div class="token-meta">md · 메뉴 카드<code>8px</code></div></div>
+        <div class="token-row"><div class="token-box" style="border-radius:9999px"></div><div class="token-meta">full · 버튼 알약 모양<code>9999px</code></div></div>
+      </div>
+    </section>
+
+    <section class="section" id="preview">
+      <div class="section-label">Preview</div>
+      <h2>이렇게 보여요</h2>
+      <div class="ds-preview" style="--ds-font:Pretendard, -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', sans-serif; --ds-bg:#ffffff; --ds-surface:#f7f8fa; --ds-surface-alt:#f2f3f6; --ds-border:#eaebee; --ds-secondary-border:rgba(26, 28, 32, 0.118); --ds-text:#212124; --ds-muted:#868b94; --ds-primary:#ff6f0f; --ds-on-primary:#ffffff; --ds-primary-soft:#fff5f0; --ds-radius:8px; --ds-btn-radius:9999px; --ds-btn-pad:4px 12px; --ds-btn-size:14px; --ds-title-size:16px">
+        <div>
+          <p class="preview-label">버튼</p>
+          <div class="ds-row">
+            <button class="ds-btn">오늘 거 올려볼까요?</button>
+            <button class="ds-btn is-secondary">하루 카드</button>
+          </div>
+        </div>
+        <div>
+          <p class="preview-label">카드</p>
+          <div class="ds-card"><h4>3월 14일 · 성수동 파스타 38,000원</h4><p>이날 사진 3장이 있어요.</p></div>
+        </div>
+        <div>
+          <p class="preview-label">입력창 · 칩</p>
+          <div class="ds-row"><input class="ds-input" placeholder="이달의 코멘트" readonly><span class="ds-chip is-on">공용</span><span class="ds-chip">내 용돈</span><span class="ds-chip">내 자산</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="deps">
+      <div class="section-label">Libraries</div>
+      <h2>아이콘 · 글꼴</h2>
+      <dl class="kv">
+        <dt>아이콘</dt><dd>Phosphor (<code>@phosphor-icons/react</code>) · MIT. 평소엔 regular, 선택 상태만 fill</dd>
+        <dt>글꼴</dt><dd>Pretendard · SIL Open Font License 1.1</dd>
+      </dl>
+    </section>
+
+    <section class="section" id="dos">
+      <div class="section-label">Do · Don't</div>
+      <h2>이렇게 쓰고, 이렇게 쓰지 않아요</h2>
+      <div class="compare">
+        <div class="compare-col is-do">
+          <h3>Do</h3>
+          <ul>
+            <li>앱 안에서는 accent-500 <code>#ff6f0f</code>을 써요</li>
+            <li>Pretendard와 정해진 대체 글꼴 순서를 써요</li>
+            <li>컴포넌트마다 정해진 상태와 접근성 동작을 따라요 (출처: SEED)</li>
+            <li><code>#ff6600</code>은 랜딩 · 소개 페이지에만 써요</li>
+            <li>지출 카드와 행마다 날짜 · 장소 · 금액을 원 단위까지 보여줘요</li>
+          </ul>
+        </div>
+        <div class="compare-col is-dont">
+          <h3>Don't</h3>
+          <ul>
+            <li><code>#ff6600</code>을 accent-500이라고 부르지 않아요</li>
+            <li>한글 화면에 시스템 글꼴 우선 순서로 돌아가지 않아요</li>
+            <li>예전 최대 크기 26px를 다시 쓰지 않아요 (제목은 48px까지)</li>
+            <li>웹에서 잰 하루 카드를 앱 카드나 시트로 그대로 옮기지 않아요</li>
+            <li>브라우저 기본 포커스 테두리를 우리 포커스 스타일로 여기지 않아요</li>
+            <li>밀린 기록, 알림, 많이 쓴 지출에 빨간색이나 경고 아이콘을 쓰지 않아요</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="voice">
+      <div class="section-label">Voice</div>
+      <h2>보이스</h2>
+      <p class="say is-do">오늘 거 올려볼까요? 캡처 한 장이면 돼요.</p>
+      <p class="say is-do">목표 달성. 둘이 3개월 동안 모은 돈이에요.</p>
+      <p class="say is-dont">N일째 기록이 없어요</p>
+      <p class="source"><a href="VOICE.html">보이스 가이드 자세히 보기 →</a></p>
+    </section>
+
+    <footer class="footer">Vibe Studio · 원본: docs/DESIGN.md</footer>
+  </main>
+</div>
+
+<script>
+  // 스크롤 위치에 맞춰 사이드바 목차 강조
+  (function () {
+    var links = [].slice.call(document.querySelectorAll('.toc a[href^="#"]'));
+    var pairs = links.map(function (a) { return [a, document.getElementById(a.getAttribute('href').slice(1))]; })
+                     .filter(function (p) { return p[1]; });
+    if (!pairs.length) return;
+    function update() {
+      var current = pairs[0];
+      var atBottom = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 2;
+      if (atBottom) current = pairs[pairs.length - 1];
+      else pairs.forEach(function (p) { if (p[1].getBoundingClientRect().top <= 120) current = p; });
+      pairs.forEach(function (p) { p[0].classList.toggle('is-active', p === current); });
+    }
+    window.addEventListener('scroll', update, { passive: true });
+    update();
+  })();
+</script>
+</body>
+</html>
