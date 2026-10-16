@@ -39,3 +39,7 @@ venv/
 
 # Claude Code local settings
 .claude/settings.local.json
+
+# Vite
+dist-ssr/
+*.local

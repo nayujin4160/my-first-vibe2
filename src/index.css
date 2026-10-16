@@ -1,0 +1,70 @@
+@import 'pretendard/dist/web/variable/pretendardvariable-dynamic-subset.css';
+@import 'tailwindcss';
+
+/* 값은 docs/DESIGN.md 그대로 */
+@theme {
+  --font-sans: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo',
+    'Malgun Gothic', 'Noto Sans KR', sans-serif;
+
+  --color-primary: #ff6f0f;
+  --color-primary-hover: #ff9e66;
+  --color-canvas: #ffffff;
+  --color-background: #f2f3f6;
+  --color-surface: #f7f8fa;
+  --color-fg: #212124;
+  --color-muted: #868b94;
+  --color-hairline: #eaebee;
+  --color-brand-tint: #fff5f0;
+  --color-error: #fa2314;
+  --color-info: #009ceb;
+  --color-success: #1aa174;
+  --color-disabled-bg: #dcdee3;
+  --color-disabled-fg: #adb1ba;
+  --color-overlay: rgba(0, 0, 0, 0.5);
+
+  --radius-sm: 6px;
+  --radius-md: 8px;
+
+  --text-title: 24px;
+  --text-title--line-height: 1.35;
+  --text-title--font-weight: 700;
+  --text-body: 16px;
+  --text-body--line-height: 1.5;
+  --text-body--letter-spacing: -0.02em;
+  --text-body-small: 14px;
+  --text-body-small--line-height: 1.5;
+  --text-body-small--letter-spacing: -0.02em;
+
+  --ease-enter: cubic-bezier(0, 0, 0.2, 1);
+  --ease-exit: cubic-bezier(0.4, 0, 1, 1);
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+
+  --animate-sheet-in: sheet-in 250ms var(--ease-enter);
+  --animate-fade-in: fade-in 250ms var(--ease-enter);
+
+  @keyframes sheet-in {
+    from { transform: translateY(40px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+}
+
+html,
+body {
+  background: var(--color-background);
+  color: var(--color-fg);
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0ms !important;
+    transition-duration: 0ms !important;
+  }
+}
