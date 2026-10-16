@@ -113,6 +113,9 @@ export function DayCard({ date }: { date: string }) {
       </div>
 
       <ul className="mt-4">
+        {entries.length === 0 && (
+          <li className="px-4 py-2.5 text-body text-muted">이날은 아직 비어 있어요. 캡처 한 장이면 돼요.</li>
+        )}
         {entries.map((e) => (
           <li key={e.id}>
             <button
