@@ -1,6 +1,7 @@
 import { usePath } from './lib/router'
 import { Account } from './screens/Account'
 import { DayCard } from './screens/DayCard'
+import { Home } from './screens/Home'
 import { Reading } from './screens/Reading'
 import { Result } from './screens/Result'
 import { Start } from './screens/Start'
@@ -18,6 +19,8 @@ export default function App() {
       return <Result />
     case '/account':
       return <Account />
+    case '/home':
+      return <Home />
     default:
       return <Start />
   }

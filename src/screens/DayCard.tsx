@@ -1,7 +1,9 @@
 import { CaretLeft, CaretRight, Plus } from '@phosphor-icons/react'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { NotifySheet } from '../components/NotifySheet'
 import { PhotoPicker } from '../components/PhotoPicker'
 import { BottomBar, Screen, SecondaryButton } from '../components/ui'
+import { flash } from '../lib/flash'
 import { dayLabel, won } from '../lib/format'
 import { shrinkImage } from '../lib/image'
 import { navigate } from '../lib/router'
@@ -15,6 +17,18 @@ export function DayCard({ date }: { date: string }) {
   const picker = useRef<HTMLInputElement>(null)
   const [uploading, setUploading] = useState(false)
   const [failed, setFailed] = useState(false)
+  const notifyAsked = useStore((s) => s.notifyAsked)
+  const [asking, setAsking] = useState(false)
+
+  // 첫 하루 카드를 본 직후에만 알림을 묻는다 (FLOWS F1 ⑥)
+  const goCalendar = () => (notifyAsked ? navigate('/home') : setAsking(true))
+  const closeNotify = (on: boolean) => {
+    setState({ notifyAsked: true, notifyOn: on })
+    // 흉내: 저녁 알림 — 실제로 보내지 않고 화면 안내로 대신 (SETUP)
+    if (on) flash.set('저녁에 "오늘 거 올려볼까요?" 하고 알려드릴게요.')
+    setAsking(false)
+    navigate('/home')
+  }
 
   useEffect(() => {
     if (!user) navigate('/', { replace: true })
@@ -103,8 +117,10 @@ export function DayCard({ date }: { date: string }) {
       </div>
 
       <BottomBar>
-        <SecondaryButton onClick={() => navigate('/home')}>달력 보기</SecondaryButton>
+        <SecondaryButton onClick={goCalendar}>달력 보기</SecondaryButton>
       </BottomBar>
+
+      <NotifySheet open={asking} onAccept={() => closeNotify(true)} onDecline={() => closeNotify(false)} />
 
       <PhotoPicker ref={picker} multiple={false} onPick={([file]) => attach(file)} />
     </Screen>

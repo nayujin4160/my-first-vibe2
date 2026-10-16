@@ -9,11 +9,13 @@ import { useStore } from '../lib/store'
 export function Start() {
   const picker = useRef<HTMLInputElement>(null)
   const hasDraft = useStore((s) => s.draft !== null)
+  const hasUser = useStore((s) => s.user !== null)
 
-  // 계정 만들다 나갔다 돌아오면 정리 결과(③)부터 (FLOWS F1 ④ 예외)
+  // 계정 만들다 나갔다 돌아오면 정리 결과(③)부터 (FLOWS F1 ④ 예외) · 이미 시작했으면 홈으로
   useEffect(() => {
     if (hasDraft) navigate('/result', { replace: true })
-  }, [hasDraft])
+    else if (hasUser) navigate('/home', { replace: true })
+  }, [hasDraft, hasUser])
 
   return (
     <Screen>
