@@ -48,12 +48,10 @@ export function getState() {
 
 export function setState(update: Partial<State> | ((s: State) => Partial<State>)) {
   const patch = typeof update === 'function' ? update(state) : update
-  state = { ...state, ...patch }
-  try {
-    localStorage.setItem(KEY, JSON.stringify(state))
-  } catch {
-    throw new Error('storage-full')
-  }
+  const next = { ...state, ...patch }
+  // 저장 공간이 꽉 차면 바꾸지 않고 실패를 알린다
+  localStorage.setItem(KEY, JSON.stringify(next))
+  state = next
   listeners.forEach((l) => l())
 }
 
