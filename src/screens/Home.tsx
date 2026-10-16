@@ -1,4 +1,4 @@
-import { CaretLeft, CaretRight } from '@phosphor-icons/react'
+import { CaretLeft, CaretRight, GearSix } from '@phosphor-icons/react'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { blankEntry, EditEntrySheet } from '../components/EditEntrySheet'
 import { PhotoPicker } from '../components/PhotoPicker'
@@ -43,11 +43,14 @@ export function Home() {
     return { y, m }
   })
 
+  const knownName = useStore((s) => s.knownName)
+
   useEffect(() => {
-    if (!user) navigate('/', { replace: true })
+    // 로그인이 풀린 채 돌아왔으면 다시 시작하기로, 처음이면 시작 화면으로 (FLOWS F2 예외)
+    if (!user) navigate(knownName ? '/account' : '/', { replace: true })
     // 정리하다 만 결과가 남아 있으면 정리 결과부터 (FLOWS F2 예외)
     else if (hasDraft) navigate('/result', { replace: true })
-  }, [user, hasDraft])
+  }, [user, hasDraft, knownName])
 
   if (!user) return null
 
@@ -78,6 +81,10 @@ export function Home() {
         {/* 이번 달보다 뒤로는 넘기지 않는다 */}
         <IconButton label="다음 달" disabled={isThisMonth} onClick={() => move(1)}>
           <CaretRight size={22} />
+        </IconButton>
+        <span className="flex-1" />
+        <IconButton label="설정" onClick={() => navigate('/settings')}>
+          <GearSix size={22} />
         </IconButton>
       </header>
 

@@ -4,6 +4,7 @@ import { DayCard } from './screens/DayCard'
 import { Home } from './screens/Home'
 import { Reading } from './screens/Reading'
 import { Result } from './screens/Result'
+import { Settings } from './screens/Settings'
 import { Start } from './screens/Start'
 
 export default function App() {
@@ -21,6 +22,8 @@ export default function App() {
       return <Account />
     case '/home':
       return <Home />
+    case '/settings':
+      return <Settings />
     default:
       return <Start />
   }

@@ -14,6 +14,7 @@ export type Draft = {
 export type State = {
   draft: Draft | null // 저장 전 정리 결과
   user: { name: string } | null
+  knownName: string | null // 로그아웃해도 남는 마지막 계정 이름 — 다시 시작하면 기록이 이어짐
   entries: Entry[] // 저장한 내역
   photos: Record<string, string> // 날짜 → 사진(data URL)
   notifyAsked: boolean
@@ -25,6 +26,7 @@ const KEY = 'kongal:v1'
 const initial: State = {
   draft: null,
   user: null,
+  knownName: null,
   entries: [],
   photos: {},
   notifyAsked: false,

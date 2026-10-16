@@ -6,31 +6,45 @@ import { demo } from '../lib/demo'
 import { navigate } from '../lib/router'
 import { getState, setState, useStore } from '../lib/store'
 
-// F1 ④ 시작하기(계정)
+// F1 ④ 시작하기(계정) · F2: 로그인이 풀린 채 돌아왔을 때 다시 시작하기
 export function Account() {
   const draft = useStore((s) => s.draft)
+  const knownName = useStore((s) => s.knownName)
+  const user = useStore((s) => s.user)
   const [loading, setLoading] = useState(false)
   const [failed, setFailed] = useState(false)
 
-  useEffect(() => {
-    if (!draft && !loading) navigate(getState().user ? '/home' : '/', { replace: true })
-  }, [draft, loading])
+  // 저장할 정리 결과도 없고, 전에 쓰던 계정도 없으면 여기 있을 이유가 없음
+  const returning = !draft && !!knownName && !user
 
-  if (!draft) return null
+  useEffect(() => {
+    if (!draft && !returning && !loading) navigate(getState().user ? '/home' : '/', { replace: true })
+  }, [draft, returning, loading])
+
+  if (!draft && !returning) return null
 
   const start = () => {
     setFailed(false)
     setLoading(true)
-    // 흉내: 카카오로 시작 — 카카오에 다녀온 척하고 "김콩알"로 통과 (SETUP)
+    // 흉내: 카카오로 시작 — 카카오에 다녀온 척하고 "김콩알"로 통과. 이 기기에 남은 기록이 그대로 이어짐 (SETUP)
     setTimeout(() => {
       if (demo.kakaoFail()) {
         setLoading(false)
         setFailed(true)
         return
       }
-      const entries = draft.entries
-      const latest = entries.reduce((max, e) => (e.date > max ? e.date : max), entries[0].date)
-      setState({ user: { name: mockUserName }, entries, draft: null })
+      if (!draft) {
+        setState({ user: { name: mockUserName }, knownName: mockUserName })
+        navigate('/home', { replace: true })
+        return
+      }
+      const latest = draft.entries.reduce((max, e) => (e.date > max ? e.date : max), draft.entries[0].date)
+      setState((s) => ({
+        user: { name: mockUserName },
+        knownName: mockUserName,
+        entries: [...s.entries, ...draft.entries],
+        draft: null,
+      }))
       navigate(`/day/${latest}`, { replace: true })
     }, 800)
   }
@@ -38,8 +52,17 @@ export function Account() {
   return (
     <Screen>
       <div className="flex flex-1 flex-col justify-center px-6">
-        <h1 className="text-title text-fg">정리한 {draft.entries.length}건을 저장할까요?</h1>
-        <p className="mt-3 text-body text-muted">카카오로 시작하면 다른 기기에서도 이어서 볼 수 있어요.</p>
+        {draft ? (
+          <>
+            <h1 className="text-title text-fg">정리한 {draft.entries.length}건을 저장할까요?</h1>
+            <p className="mt-3 text-body text-muted">카카오로 시작하면 다른 기기에서도 이어서 볼 수 있어요.</p>
+          </>
+        ) : (
+          <>
+            <h1 className="text-title text-fg">다시 시작할까요?</h1>
+            <p className="mt-3 text-body text-muted">카카오로 시작하면 쌓아둔 기록이 그대로 이어져요.</p>
+          </>
+        )}
       </div>
 
       <div className="px-4 pb-[max(16px,env(safe-area-inset-bottom))]">
